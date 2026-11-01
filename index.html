@@ -130,10 +130,12 @@
     }
     .live-value {
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-variant-numeric: tabular-nums;
       font-size: 22px;
       font-weight: 800;
       color: #f8fafc;
-      margin-top: 4px;
+      margin-top: 5px;
+      letter-spacing: -0.5px;
     }
     .live-sub {
       font-size: 11px;
@@ -310,7 +312,8 @@
 </div>
 
 <script>
-  let liveLossTimer = null;
+  let liveAnimationTimer = null;
+  let displayedPounds = null;
   const todayStr = new Date().toISOString().split('T')[0];
 
   ['currentWeight', 'targetWeight', 'maintenance', 'intakeTarget', 'startDate'].forEach(id => {
@@ -372,6 +375,7 @@
 
     if (confirmed) {
       document.getElementById('startDate').value = todayStr;
+      displayedPounds = 0;
       saveSettings();
     }
   }
@@ -392,6 +396,7 @@
     const totalDeficitNeeded = totalPounds * 3500;
     const totalDays = Math.ceil(totalDeficitNeeded / dailyDeficit);
 
+    // Midnight of start date
     const start = new Date(startStr + "T00:00:00");
     const now = new Date();
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -415,24 +420,44 @@
     document.getElementById('finishDate').innerText =
       `🏁 Projected Finish: ${projected.toLocaleDateString(undefined, dateOptions)}`;
 
-    // Set up Realtime 15-second Counter
-    if (liveLossTimer) clearInterval(liveLossTimer);
+    // SMOOTH ROLLING ODOMETER (Updates every 40 milliseconds)
+    if (liveAnimationTimer) clearInterval(liveAnimationTimer);
 
-    function tickLiveLoss() {
+    const lbsPerMs = dailyDeficit / (3500 * 86400 * 1000);
+
+    function tickGradualCounter() {
       const currentTime = new Date();
-      const elapsedSeconds = Math.max(0, (currentTime - start) / 1000);
-      
-      // Fat burned per second = dailyDeficit / (3500 * 86400)
-      const lbsPerSecond = dailyDeficit / (3500 * 86400);
-      const burnedSoFar = Math.min(totalPounds, elapsedSeconds * lbsPerSecond);
-      const remainingBurn = Math.max(0, totalPounds - burnedSoFar);
+      const elapsedMs = Math.max(0, currentTime - start);
+      const trueTargetBurned = Math.min(totalPounds, elapsedMs * lbsPerMs);
 
-      document.getElementById('livePoundsVal').innerText = `${burnedSoFar.toFixed(6)} lbs`;
+      // Initialize on first load slightly behind target so it rolls in smoothly
+      if (displayedPounds === null) {
+        displayedPounds = Math.max(0, trueTargetBurned - 0.000030);
+      }
+
+      // If behind, smoothly roll towards the true number instead of jumping
+      if (displayedPounds < trueTargetBurned) {
+        const diff = trueTargetBurned - displayedPounds;
+        // Step size smoothly scales so it catches up gracefully
+        const step = Math.max(0.000001, diff * 0.08);
+        displayedPounds += step;
+
+        if (displayedPounds >= trueTargetBurned) {
+          displayedPounds = trueTargetBurned;
+        }
+      } else {
+        displayedPounds = trueTargetBurned;
+      }
+
+      const remainingBurn = Math.max(0, totalPounds - displayedPounds);
+
+      // Exactly 6 decimal places, rolling gradually
+      document.getElementById('livePoundsVal').innerText = `${displayedPounds.toFixed(6)} lbs`;
       document.getElementById('livePoundsLeft').innerText = `~${remainingBurn.toFixed(4)} lbs left to goal`;
     }
 
-    tickLiveLoss(); // Run immediately on load
-    liveLossTimer = setInterval(tickLiveLoss, 15000); // Ticks every 15 seconds
+    tickGradualCounter();
+    liveAnimationTimer = setInterval(tickGradualCounter, 40); // 40ms smooth loop
   }
 </script>
 
