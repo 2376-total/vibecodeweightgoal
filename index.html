@@ -95,11 +95,57 @@
       margin-top: 14px;
       line-height: 1.5;
     }
-    .finish-date {
+
+    /* REALTIME FAT LOSS BOX */
+    .live-counter-box {
+      margin-top: 14px;
+      background: rgba(34, 197, 94, 0.08);
+      border: 1px solid rgba(34, 197, 94, 0.25);
+      border-radius: 12px;
+      padding: 12px;
+    }
+    .live-label {
+      font-size: 11px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
       color: #22c55e;
       font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    .live-dot {
+      width: 7px;
+      height: 7px;
+      background: #22c55e;
+      border-radius: 50%;
+      box-shadow: 0 0 6px #22c55e;
+      animation: pulse 1.5s infinite;
+    }
+    @keyframes pulse {
+      0% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.85); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+    .live-value {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 22px;
+      font-weight: 800;
+      color: #f8fafc;
+      margin-top: 4px;
+    }
+    .live-sub {
+      font-size: 11px;
+      color: #94a3b8;
+      margin-top: 2px;
+    }
+
+    .finish-date {
+      color: #38bdf8;
+      font-weight: 700;
       font-size: 14px;
-      margin-top: 12px;
+      margin-top: 14px;
     }
 
     /* POPUP MENU */
@@ -210,6 +256,17 @@
       Tap the <b>☰</b> menu to enter your numbers and start tracking.
     </div>
 
+    <!-- Realtime Pounds Lost Counter -->
+    <div class="live-counter-box">
+      <div class="live-label">
+        <span class="live-dot"></span>
+        <span>Realtime Fat Burned</span>
+      </div>
+      <div class="live-value" id="livePoundsVal">0.000000 lbs</div>
+      <div class="live-sub" id="livePoundsLeft">Calculating remaining...</div>
+    </div>
+
+    <!-- Projected Finish Date -->
     <div class="finish-date" id="finishDate"></div>
   </div>
 </div>
@@ -225,7 +282,7 @@
     <div class="grid-2">
       <div>
         <label>Current Weight</label>
-        <input type="number" id="currentWeight" placeholder="185">
+        <input type="number" id="currentWeight" placeholder="195">
       </div>
       <div>
         <label>Goal Weight</label>
@@ -253,15 +310,14 @@
 </div>
 
 <script>
+  let liveLossTimer = null;
   const todayStr = new Date().toISOString().split('T')[0];
 
-  // Restore inputs from localStorage
   ['currentWeight', 'targetWeight', 'maintenance', 'intakeTarget', 'startDate'].forEach(id => {
     const saved = localStorage.getItem(id);
     if (saved) document.getElementById(id).value = saved;
   });
 
-  // Default start date to today if none exists
   if (!localStorage.getItem('startDate')) {
     document.getElementById('startDate').value = todayStr;
     openMenu();
@@ -277,7 +333,6 @@
     document.getElementById('menuModal').style.display = 'none';
   }
 
-  // Saves changes while preserving your start date and day count
   function saveSettings() {
     const cur = parseFloat(document.getElementById('currentWeight').value);
     const target = parseFloat(document.getElementById('targetWeight').value);
@@ -310,7 +365,6 @@
     updateDisplay();
   }
 
-  // Only resets back to Day 1 when you explicitly click this
   function resetToDayOne() {
     const confirmed = confirm(
       "Are you sure you want to reset your start date to today and restart your counter at Day 1?"
@@ -333,13 +387,11 @@
 
     document.getElementById('targetSubtext').innerText = `Target: ${target} lbs`;
 
-    // Calculations
     const dailyDeficit = maint - intake;
     const totalPounds = cur - target;
     const totalDeficitNeeded = totalPounds * 3500;
     const totalDays = Math.ceil(totalDeficitNeeded / dailyDeficit);
 
-    // Live calendar math
     const start = new Date(startStr + "T00:00:00");
     const now = new Date();
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -348,22 +400,39 @@
     const currentDay = Math.max(1, diffDays);
     const remainingDays = Math.max(0, totalDays - currentDay);
 
-    // Projected finish date based on start date + total days needed
     const projected = new Date(start);
     projected.setDate(projected.getDate() + totalDays);
     const dateOptions = { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' };
 
-    // Update screen
     document.getElementById('dayCounter').innerText = `Day ${currentDay} of ${totalDays}`;
 
     const percent = Math.min(100, Math.round((currentDay / totalDays) * 100));
     document.getElementById('progressFill').style.width = percent + '%';
 
     document.getElementById('summaryBox').innerHTML =
-      `Deficit: <b>${dailyDeficit} kcal/day</b><br><b>${remainingDays} days</b> left at ${intake} kcal to lose ${totalPounds} lbs (${percent}% completed).`;
+      `Deficit: <b>${dailyDeficit} kcal/day</b><br><b>${remainingDays} days</b> left at ${intake} kcal to finish (${percent}% completed).`;
 
     document.getElementById('finishDate').innerText =
       `🏁 Projected Finish: ${projected.toLocaleDateString(undefined, dateOptions)}`;
+
+    // Set up Realtime 15-second Counter
+    if (liveLossTimer) clearInterval(liveLossTimer);
+
+    function tickLiveLoss() {
+      const currentTime = new Date();
+      const elapsedSeconds = Math.max(0, (currentTime - start) / 1000);
+      
+      // Fat burned per second = dailyDeficit / (3500 * 86400)
+      const lbsPerSecond = dailyDeficit / (3500 * 86400);
+      const burnedSoFar = Math.min(totalPounds, elapsedSeconds * lbsPerSecond);
+      const remainingBurn = Math.max(0, totalPounds - burnedSoFar);
+
+      document.getElementById('livePoundsVal').innerText = `${burnedSoFar.toFixed(6)} lbs`;
+      document.getElementById('livePoundsLeft').innerText = `~${remainingBurn.toFixed(4)} lbs left to goal`;
+    }
+
+    tickLiveLoss(); // Run immediately on load
+    liveLossTimer = setInterval(tickLiveLoss, 15000); // Ticks every 15 seconds
   }
 </script>
 
