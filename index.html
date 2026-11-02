@@ -106,7 +106,7 @@
       border-radius: 12px;
       padding: 12px;
     }
-    .live-label {
+    .box-title {
       font-size: 11px;
       letter-spacing: 0.8px;
       text-transform: uppercase;
@@ -116,6 +116,7 @@
       align-items: center;
       justify-content: center;
       gap: 6px;
+      margin-bottom: 4px;
     }
     .live-dot {
       width: 7px;
@@ -144,9 +145,33 @@
       margin-top: 2px;
     }
 
-    /* GRAPH SECTION with 191b1c Background */
+    /* GOAL INFORMATION BOX */
+    .goal-info-box {
+      margin-top: 10px;
+      background: #212121;
+      border: 1px solid #303030;
+      border-radius: 12px;
+      padding: 12px 14px;
+      text-align: center;
+      color: var(--darkreader-text-aaaaaa, #b2aca2);
+    }
+    .goal-info-box .box-title {
+      color: var(--darkreader-text-aaaaaa, #b2aca2);
+    }
+    .goal-text {
+      font-size: 13px;
+      color: var(--darkreader-text-aaaaaa, #b2aca2);
+      line-height: 1.5;
+      margin-top: 4px;
+    }
+    .goal-text b {
+      color: var(--darkreader-text-aaaaaa, #b2aca2);
+      font-weight: 700;
+    }
+
+    /* GRAPH SECTION with #191b1c Background */
     .graph-section {
-      margin-top: 18px;
+      margin-top: 14px;
       background: #191b1c;
       border: 1px solid #272727;
       border-radius: 14px;
@@ -156,6 +181,9 @@
       position: relative;
       height: 215px;
       width: 100%;
+    }
+    .canvas-wrapper canvas {
+      background-color: #191b1c;
     }
     .toggle-row {
       display: flex;
@@ -286,7 +314,7 @@
       cursor: pointer;
     }
 
-    /* Log List with Outlines */
+    /* Log List with Outlines & Clean White Action Buttons */
     .log-list {
       margin-top: 10px;
       border-top: 1px solid #7b7265;
@@ -303,14 +331,25 @@
     }
     .log-actions {
       display: flex;
-      gap: 10px;
+      gap: 8px;
     }
-    .action-icon {
-      background: transparent;
-      border: none;
+    .clean-btn {
+      background: #272727;
+      border: 1px solid #383838;
+      border-radius: 6px;
       cursor: pointer;
-      font-size: 14px;
-      padding: 2px 4px;
+      padding: 6px 8px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s, border-color 0.2s;
+    }
+    .clean-btn:hover {
+      background: #333333;
+      border-color: #555555;
+    }
+    .clean-btn svg {
+      display: block;
     }
     .sort-toggle-btn {
       background: #272727;
@@ -349,7 +388,7 @@
 
     <!-- Realtime Fat Burned Counter -->
     <div class="live-counter-box">
-      <div class="live-label">
+      <div class="box-title">
         <span class="live-dot"></span>
         <span>Realtime Fat Burned</span>
       </div>
@@ -357,7 +396,15 @@
       <div class="live-sub" id="livePoundsLeft">Calculating remaining...</div>
     </div>
 
-    <!-- Weight Graph with 191b1c Background -->
+    <!-- Goal Information Box (All Text in var(--darkreader-text-aaaaaa, #b2aca2)) -->
+    <div class="goal-info-box">
+      <div class="box-title">Goal Information</div>
+      <div class="goal-text" id="goalInfoText">
+        <div>Calculating plan...</div>
+      </div>
+    </div>
+
+    <!-- Weight Graph with #191b1c Background -->
     <div class="graph-section">
       <div class="canvas-wrapper">
         <canvas id="weightChart"></canvas>
@@ -586,8 +633,22 @@
             <div style="font-size:11px; color:#888;">${formatted}</div>
           </div>
           <div class="log-actions">
-            <button class="action-icon" style="color:#38bdf8;" onclick="openEditModal(${l.id})" title="Edit">✏️</button>
-            <button class="action-icon" style="color:#ff4e45;" onclick="deleteLog(${l.id})" title="Delete">🗑️</button>
+            <!-- Clean White Pencil SVG -->
+            <button class="clean-btn" onclick="openEditModal(${l.id})" title="Edit">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 20h9"></path>
+                <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+              </svg>
+            </button>
+            <!-- Clean White Trash Bin SVG -->
+            <button class="clean-btn" onclick="deleteLog(${l.id})" title="Delete">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="3 6 5 6 21 6"></polyline>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                <line x1="10" y1="11" x2="10" y2="17"></line>
+                <line x1="14" y1="11" x2="14" y2="17"></line>
+              </svg>
+            </button>
           </div>
         </div>
       `;
@@ -679,6 +740,7 @@
 
     const diffDays = Math.floor((today - start) / (1000 * 60 * 60 * 24)) + 1;
     const currentDay = Math.max(1, diffDays);
+    const remainingDays = Math.max(0, totalDays - currentDay);
 
     const projected = new Date(start);
     projected.setDate(projected.getDate() + totalDays);
@@ -688,6 +750,12 @@
 
     const percent = Math.min(100, Math.round((currentDay / totalDays) * 100));
     document.getElementById('progressFill').style.width = percent + '%';
+
+    // POPULATE GOAL INFORMATION BOX
+    document.getElementById('goalInfoText').innerHTML = `
+      <div><b>${remainingDays} days</b> remaining to <b>${target} lbs</b> at <b>${intake}</b> calories daily</div>
+      <div style="margin-top: 5px;"><b>${maint}</b> maintenance - <b>${intake}</b> target = <b>${dailyDeficit}</b> calorie deficit daily</div>
+    `;
 
     document.getElementById('finishDate').innerText =
       `🏁 Projected Goal Date: ${projected.toLocaleDateString(undefined, dateOptions)}`;
@@ -740,7 +808,6 @@
       minX = startDate.getTime();
       maxX = projectedEndDate.getTime();
 
-      // Checkpoints dotted along the entire ruler-straight line
       const steps = 14;
       const totalSpan = maxX - minX;
 
@@ -765,7 +832,6 @@
         maxX = minX + (7 * 24 * 3600 * 1000);
       }
 
-      // Checkpoints along the First to Last range
       const steps = 8;
       const span = maxX - minX;
 
@@ -799,7 +865,7 @@
             pointHoverRadius: 8,
             pointHitRadius: 25,
             spanGaps: true,
-            tension: 0.4, // Smooth curved interpolation between actual logs
+            tension: 0.4,
             cubicInterpolationMode: 'monotone',
             borderWidth: 2.4
           },
@@ -809,11 +875,11 @@
             borderColor: '#ff4e45',
             backgroundColor: 'transparent',
             pointBackgroundColor: '#ff4e45',
-            pointRadius: 3.5, // Dotted checkpoint markers along the line
+            pointRadius: 3.5,
             pointHoverRadius: 6,
             pointHitRadius: 20,
             borderDash: [5, 5],
-            tension: 0, // Ruler-straight slope
+            tension: 0,
             borderWidth: 1.8
           }
         ]
