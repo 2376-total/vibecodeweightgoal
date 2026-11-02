@@ -2,119 +2,115 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Deficit Runway</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Weight Tracker</title>
   
   <!-- Tab Favicon & Phone Home Screen Icon -->
   <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/2376-total/vibecodeweightgoal/refs/heads/main/6534064.png">
   <link rel="shortcut icon" href="https://raw.githubusercontent.com/2376-total/vibecodeweightgoal/refs/heads/main/6534064.png">
   <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/2376-total/vibecodeweightgoal/refs/heads/main/6534064.png">
 
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
   <style>
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background: #090d16;
-      color: #f8fafc;
-      padding: 16px;
+      font-family: "Roboto", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #0f0f0f;
+      color: #f1f1f1;
+      padding: 14px;
       display: flex;
       justify-content: center;
       margin: 0;
+      -webkit-tap-highlight-color: transparent;
     }
     .card {
-      background: #131d31;
-      padding: 22px;
-      border-radius: 20px;
+      background: #181818;
+      padding: 20px;
+      border-radius: 16px;
       width: 100%;
-      max-width: 400px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-      border: 1px solid #1e293b;
-      position: relative;
+      max-width: 420px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+      border: 1px solid #272727;
+      box-sizing: border-box;
     }
     .header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 20px;
+      margin-bottom: 18px;
     }
     .title-group h1 {
       margin: 0;
-      font-size: 20px;
-      letter-spacing: -0.5px;
-      color: #f8fafc;
+      font-size: 21px;
+      font-weight: 700;
+      color: #ffffff;
     }
     .title-group p {
       margin: 2px 0 0;
       font-size: 13px;
-      color: #38bdf8;
-      font-weight: 600;
+      color: #aaaaaa;
+      font-weight: 500;
     }
-    .menu-btn {
-      background: #1e293b;
-      border: 1px solid #334155;
-      color: #f8fafc;
-      font-size: 20px;
-      width: 40px;
-      height: 40px;
-      border-radius: 10px;
+    .top-actions {
+      display: flex;
+      gap: 8px;
+    }
+    .icon-btn {
+      background: #272727;
+      border: 1px solid #383838;
+      color: #f1f1f1;
+      font-size: 19px;
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
     }
-    .stats-container {
-      text-align: center;
-      padding: 10px 0;
-    }
+
+    .stats-container { text-align: center; }
     .day-badge {
       font-size: 12px;
-      letter-spacing: 1px;
       text-transform: uppercase;
-      color: #94a3b8;
-      font-weight: 700;
+      letter-spacing: 0.8px;
+      color: #aaaaaa;
+      font-weight: 600;
     }
     .big-num {
-      font-size: 38px;
+      font-size: 36px;
       font-weight: 800;
-      color: #38bdf8;
-      margin: 6px 0 12px;
+      color: #ffffff;
+      margin: 4px 0 10px;
     }
     .progress-bar {
-      background: #1e293b;
-      height: 14px;
-      border-radius: 7px;
+      background: #272727;
+      height: 10px;
+      border-radius: 5px;
       overflow: hidden;
-      margin: 16px 0;
-      border: 1px solid #334155;
+      margin: 12px 0;
     }
     .progress-fill {
       height: 100%;
-      background: #22c55e;
+      background: #ff0000;
       width: 0%;
       transition: width 0.4s ease;
     }
-    .info-card {
-      background: #090d16;
-      padding: 12px;
-      border-radius: 12px;
-      font-size: 13px;
-      color: #cbd5e1;
-      margin-top: 14px;
-      line-height: 1.5;
-    }
 
-    /* REALTIME FAT LOSS BOX */
+    /* Live Fat Burn Odometer */
     .live-counter-box {
       margin-top: 14px;
-      background: rgba(34, 197, 94, 0.08);
-      border: 1px solid rgba(34, 197, 94, 0.25);
+      background: #212121;
+      border: 1px solid #303030;
       border-radius: 12px;
       padding: 12px;
     }
     .live-label {
       font-size: 11px;
-      letter-spacing: 1px;
+      letter-spacing: 0.8px;
       text-transform: uppercase;
-      color: #22c55e;
+      color: #aaaaaa;
       font-weight: 700;
       display: flex;
       align-items: center;
@@ -124,14 +120,14 @@
     .live-dot {
       width: 7px;
       height: 7px;
-      background: #22c55e;
+      background: #ff0000;
       border-radius: 50%;
-      box-shadow: 0 0 6px #22c55e;
+      box-shadow: 0 0 6px #ff0000;
       animation: pulse 1.5s infinite;
     }
     @keyframes pulse {
       0% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.4; transform: scale(0.85); }
+      50% { opacity: 0.4; transform: scale(0.8); }
       100% { opacity: 1; transform: scale(1); }
     }
     .live-value {
@@ -139,43 +135,81 @@
       font-variant-numeric: tabular-nums;
       font-size: 22px;
       font-weight: 800;
-      color: #f8fafc;
-      margin-top: 5px;
-      letter-spacing: -0.5px;
+      color: #ffffff;
+      margin-top: 4px;
     }
     .live-sub {
       font-size: 11px;
-      color: #94a3b8;
+      color: #aaaaaa;
       margin-top: 2px;
     }
 
+    /* GRAPH SECTION with 191b1c Background */
+    .graph-section {
+      margin-top: 18px;
+      background: #191b1c;
+      border: 1px solid #272727;
+      border-radius: 14px;
+      padding: 12px;
+    }
+    .canvas-wrapper {
+      position: relative;
+      height: 215px;
+      width: 100%;
+    }
+    .toggle-row {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 10px;
+    }
+    .toggle-pill {
+      background: #272727;
+      border: 1px solid #383838;
+      color: #aaaaaa;
+      padding: 5px 12px;
+      border-radius: 16px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .toggle-pill.active {
+      background: #f1f1f1;
+      color: #0f0f0f;
+      border-color: #f1f1f1;
+    }
+
     .finish-date {
-      color: #38bdf8;
-      font-weight: 700;
-      font-size: 14px;
+      color: #aaaaaa;
+      font-weight: 600;
+      font-size: 13px;
       margin-top: 14px;
     }
 
-    /* POPUP MENU */
+    /* POPUP MODALS */
     .modal-overlay {
       display: none;
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0, 0, 0, 0.7);
-      backdrop-filter: blur(4px);
-      z-index: 10;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(5px);
+      z-index: 100;
       justify-content: center;
       align-items: center;
       padding: 16px;
     }
     .modal {
-      background: #131d31;
-      border: 1px solid #334155;
-      padding: 22px;
-      border-radius: 18px;
+      background: #1e1e1e;
+      border: 1px solid #333333;
+      padding: 20px;
+      border-radius: 16px;
       width: 100%;
       max-width: 380px;
       box-sizing: border-box;
+      max-height: 88vh;
+      overflow-y: auto;
     }
     .modal-header {
       display: flex;
@@ -183,11 +217,11 @@
       align-items: center;
       margin-bottom: 12px;
     }
-    .modal-header h3 { margin: 0; font-size: 18px; color: #f8fafc; }
+    .modal-header h3 { margin: 0; font-size: 18px; color: #ffffff; }
     .close-btn {
       background: transparent;
       border: none;
-      color: #94a3b8;
+      color: #aaaaaa;
       font-size: 22px;
       cursor: pointer;
     }
@@ -200,41 +234,91 @@
       display: block;
       margin-top: 10px;
       font-size: 12px;
-      color: #94a3b8;
+      color: #aaaaaa;
     }
     input {
       width: 100%;
       padding: 10px;
       margin-top: 4px;
       border-radius: 8px;
-      border: 1px solid #334155;
-      background: #090d16;
+      border: 1px solid #333333;
+      background: #0f0f0f;
       color: white;
       font-size: 15px;
       box-sizing: border-box;
     }
-    .save-btn {
+
+    /* Outlined Buttons */
+    .btn-save-datapoint {
       width: 100%;
       padding: 12px;
       margin-top: 16px;
-      border: none;
-      border-radius: 8px;
+      border-radius: 20px;
       font-weight: 700;
-      font-size: 15px;
-      background: #38bdf8;
-      color: #090d16;
+      font-size: 14px;
+      background: #272727;
+      color: #ffffff;
+      border: 1.5px solid #7b7265;
+      cursor: pointer;
+    }
+    .btn-save-plan {
+      width: 100%;
+      padding: 12px;
+      margin-top: 16px;
+      border-radius: 20px;
+      font-weight: 700;
+      font-size: 14px;
+      background: #272727;
+      color: #ffffff;
+      border: 1.5px solid #7b7265;
       cursor: pointer;
     }
     .reset-btn {
       width: 100%;
       padding: 10px;
-      margin-top: 8px;
-      border: 1px solid #ef4444;
-      border-radius: 8px;
+      margin-top: 12px;
+      border-radius: 20px;
       font-weight: 600;
       font-size: 13px;
       background: transparent;
-      color: #ef4444;
+      color: #ff4e45;
+      border: 1.5px solid #ff4e45;
+      cursor: pointer;
+    }
+
+    /* Log List with Outlines */
+    .log-list {
+      margin-top: 10px;
+      border-top: 1px solid #7b7265;
+      max-height: 190px;
+      overflow-y: auto;
+    }
+    .log-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 4px;
+      border-bottom: 1px solid #7b7265;
+      font-size: 13px;
+    }
+    .log-actions {
+      display: flex;
+      gap: 10px;
+    }
+    .action-icon {
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      font-size: 14px;
+      padding: 2px 4px;
+    }
+    .sort-toggle-btn {
+      background: #272727;
+      border: 1px solid #383838;
+      color: #aaaaaa;
+      padding: 3px 8px;
+      border-radius: 10px;
+      font-size: 11px;
       cursor: pointer;
     }
   </style>
@@ -245,14 +329,17 @@
   <!-- Top Navigation Bar -->
   <div class="header">
     <div class="title-group">
-      <h1>Deficit Runway</h1>
+      <h1>Weight Tracker</h1>
       <p id="targetSubtext">Target: 170 lbs</p>
     </div>
-    <button class="menu-btn" onclick="openMenu()">☰</button>
+    <div class="top-actions">
+      <button class="icon-btn" onclick="openAddModal()" title="Add weigh-in">+</button>
+      <button class="icon-btn" onclick="openMenu()" title="Settings">☰</button>
+    </div>
   </div>
 
   <!-- Live Progress Section -->
-  <div class="stats-container" id="statsSection">
+  <div class="stats-container">
     <div class="day-badge">Live Day Tracker</div>
     <div class="big-num" id="dayCounter">Day 1 of --</div>
 
@@ -260,11 +347,7 @@
       <div class="progress-fill" id="progressFill"></div>
     </div>
 
-    <div class="info-card" id="summaryBox">
-      Tap the <b>☰</b> menu to enter your numbers and start tracking.
-    </div>
-
-    <!-- Realtime Pounds Lost Counter -->
+    <!-- Realtime Fat Burned Counter -->
     <div class="live-counter-box">
       <div class="live-label">
         <span class="live-dot"></span>
@@ -274,37 +357,77 @@
       <div class="live-sub" id="livePoundsLeft">Calculating remaining...</div>
     </div>
 
+    <!-- Weight Graph with 191b1c Background -->
+    <div class="graph-section">
+      <div class="canvas-wrapper">
+        <canvas id="weightChart"></canvas>
+      </div>
+
+      <!-- Time Span Controls -->
+      <div class="toggle-row">
+        <button class="toggle-pill active" id="rangeLogged" onclick="setTimeRange('LOGGED')">First to Last</button>
+        <button class="toggle-pill" id="rangeFull" onclick="setTimeRange('FULL')">Full Runway</button>
+      </div>
+
+      <!-- Line Visibility Controls -->
+      <div class="toggle-row">
+        <button class="toggle-pill active" id="btnBoth" onclick="setLineVisibility('both')">Both</button>
+        <button class="toggle-pill" id="btnActual" onclick="setLineVisibility('actual')">Actual</button>
+        <button class="toggle-pill" id="btnProjected" onclick="setLineVisibility('projected')">Projected</button>
+      </div>
+    </div>
+
     <!-- Projected Finish Date -->
     <div class="finish-date" id="finishDate"></div>
   </div>
 </div>
 
-<!-- Settings Popup Modal -->
+<!-- Add / Edit Weight Modal (+) -->
+<div class="modal-overlay" id="addModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="modalTitle">Log Weigh-in</h3>
+      <button class="close-btn" onclick="closeAddModal()">✕</button>
+    </div>
+
+    <input type="hidden" id="editLogId">
+
+    <label>Date & Time</label>
+    <input type="datetime-local" id="newLogDateTime">
+
+    <label>Weight (lbs)</label>
+    <input type="number" step="0.1" id="newLogWeight" placeholder="e.g. 183.5">
+
+    <button class="btn-save-datapoint" onclick="saveWeightEntry()">Save Datapoint</button>
+  </div>
+</div>
+
+<!-- Settings & Datapoints Modal (☰) -->
 <div class="modal-overlay" id="menuModal">
   <div class="modal">
     <div class="modal-header">
-      <h3 style="color: #38bdf8;">Plan Settings</h3>
+      <h3>Plan Settings</h3>
       <button class="close-btn" onclick="closeMenu()">✕</button>
     </div>
 
     <div class="grid-2">
       <div>
-        <label>Current Weight</label>
-        <input type="number" id="currentWeight" placeholder="195">
+        <label>Starting (lbs)</label>
+        <input type="number" id="currentWeight" placeholder="185">
       </div>
       <div>
-        <label>Goal Weight</label>
+        <label>Goal (lbs)</label>
         <input type="number" id="targetWeight" value="170">
       </div>
     </div>
 
     <div class="grid-2">
       <div>
-        <label>Maintenance (TDEE)</label>
+        <label>Maintenance</label>
         <input type="number" id="maintenance" value="2300">
       </div>
       <div>
-        <label>Daily Intake Target</label>
+        <label>Target Intake</label>
         <input type="number" id="intakeTarget" value="1500">
       </div>
     </div>
@@ -312,7 +435,17 @@
     <label>Journey Start Date</label>
     <input type="date" id="startDate">
 
-    <button class="save-btn" onclick="saveSettings()">Save Changes (Keep Streak)</button>
+    <button class="btn-save-plan" onclick="saveSettings()">Save Changes (Keep Streak)</button>
+
+    <!-- Manage Logged Datapoints with Sort Toggle -->
+    <div style="margin-top: 18px;">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h4 style="margin: 0; font-size: 14px; color: #ffffff;">Manage Logged Weights</h4>
+        <button class="sort-toggle-btn" id="sortBtn" onclick="toggleSortOrder()">Sort: Newest</button>
+      </div>
+      <div class="log-list" id="logsListContainer"></div>
+    </div>
+
     <button class="reset-btn" onclick="resetToDayOne()">Restart from Day 1 Today</button>
   </div>
 </div>
@@ -320,12 +453,40 @@
 <script>
   let liveAnimationTimer = null;
   let displayedPounds = null;
+  let weightChart = null;
+
+  let currentTimeRange = 'LOGGED';
+  let currentLineView = 'both';
+  let sortNewestFirst = true;
+
   const todayStr = new Date().toISOString().split('T')[0];
+
+  function getNowDateTimeLocal() {
+    const now = new Date();
+    const pad = n => String(n).padStart(2, '0');
+    return `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
+  }
 
   ['currentWeight', 'targetWeight', 'maintenance', 'intakeTarget', 'startDate'].forEach(id => {
     const saved = localStorage.getItem(id);
     if (saved) document.getElementById(id).value = saved;
   });
+
+  let storedLogs = JSON.parse(localStorage.getItem('weightLogs')) || [];
+  if (storedLogs.length === 0) {
+    const initial = [{
+      id: Date.now(),
+      datetime: getNowDateTimeLocal(),
+      weight: parseFloat(localStorage.getItem('currentWeight')) || 185
+    }];
+    localStorage.setItem('weightLogs', JSON.stringify(initial));
+  } else {
+    storedLogs = storedLogs.map(l => {
+      if (!l.datetime && l.date) l.datetime = l.date + 'T08:00';
+      return l;
+    });
+    localStorage.setItem('weightLogs', JSON.stringify(storedLogs));
+  }
 
   if (!localStorage.getItem('startDate')) {
     document.getElementById('startDate').value = todayStr;
@@ -335,11 +496,102 @@
   }
 
   function openMenu() {
+    renderLogsList();
     document.getElementById('menuModal').style.display = 'flex';
   }
+  function closeMenu() { document.getElementById('menuModal').style.display = 'none'; }
 
-  function closeMenu() {
-    document.getElementById('menuModal').style.display = 'none';
+  function openAddModal() {
+    document.getElementById('modalTitle').innerText = "Log Weigh-in";
+    document.getElementById('editLogId').value = "";
+    document.getElementById('newLogDateTime').value = getNowDateTimeLocal();
+    document.getElementById('newLogWeight').value = "";
+    document.getElementById('addModal').style.display = 'flex';
+  }
+
+  function openEditModal(id) {
+    let logs = JSON.parse(localStorage.getItem('weightLogs')) || [];
+    const item = logs.find(l => l.id === id);
+    if (!item) return;
+
+    closeMenu();
+    document.getElementById('modalTitle').innerText = "Edit Weigh-in";
+    document.getElementById('editLogId').value = item.id;
+    document.getElementById('newLogDateTime').value = item.datetime;
+    document.getElementById('newLogWeight').value = item.weight;
+    document.getElementById('addModal').style.display = 'flex';
+  }
+
+  function closeAddModal() { document.getElementById('addModal').style.display = 'none'; }
+
+  function saveWeightEntry() {
+    const editId = document.getElementById('editLogId').value;
+    const dtVal = document.getElementById('newLogDateTime').value;
+    const weightVal = parseFloat(document.getElementById('newLogWeight').value);
+
+    if (!dtVal || !weightVal) {
+      alert("Please enter a valid date, time, and weight.");
+      return;
+    }
+
+    let logs = JSON.parse(localStorage.getItem('weightLogs')) || [];
+
+    if (editId) {
+      logs = logs.map(item => item.id == editId ? { ...item, datetime: dtVal, weight: weightVal } : item);
+    } else {
+      logs.push({ id: Date.now(), datetime: dtVal, weight: weightVal });
+    }
+
+    logs.sort((a, b) => new Date(a.datetime) - new Date(b.datetime));
+    localStorage.setItem('weightLogs', JSON.stringify(logs));
+
+    closeAddModal();
+    updateDisplay();
+  }
+
+  function deleteLog(id) {
+    let logs = JSON.parse(localStorage.getItem('weightLogs')) || [];
+    logs = logs.filter(item => item.id !== id);
+    localStorage.setItem('weightLogs', JSON.stringify(logs));
+    renderLogsList();
+    updateDisplay();
+  }
+
+  function toggleSortOrder() {
+    sortNewestFirst = !sortNewestFirst;
+    document.getElementById('sortBtn').innerText = sortNewestFirst ? "Sort: Newest" : "Sort: Oldest";
+    renderLogsList();
+  }
+
+  function renderLogsList() {
+    const container = document.getElementById('logsListContainer');
+    let logs = JSON.parse(localStorage.getItem('weightLogs')) || [];
+    if (logs.length === 0) {
+      container.innerHTML = '<div style="font-size:12px; color:#666; padding:8px 0;">No logs yet. Use + to add one.</div>';
+      return;
+    }
+
+    let displayList = logs.slice();
+    if (sortNewestFirst) displayList.reverse();
+
+    container.innerHTML = displayList.map(l => {
+      const d = new Date(l.datetime);
+      const formatted = d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) +
+        ' ' + d.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
+
+      return `
+        <div class="log-item">
+          <div>
+            <b>${l.weight} lbs</b>
+            <div style="font-size:11px; color:#888;">${formatted}</div>
+          </div>
+          <div class="log-actions">
+            <button class="action-icon" style="color:#38bdf8;" onclick="openEditModal(${l.id})" title="Edit">✏️</button>
+            <button class="action-icon" style="color:#ff4e45;" onclick="deleteLog(${l.id})" title="Delete">🗑️</button>
+          </div>
+        </div>
+      `;
+    }).join('');
   }
 
   function saveSettings() {
@@ -353,14 +605,12 @@
       alert("Please fill in all values.");
       return;
     }
-
     if (cur <= target) {
-      alert("Current weight must be higher than your goal weight.");
+      alert("Starting weight must be higher than target weight.");
       return;
     }
-
     if (maint <= intake) {
-      alert("Daily intake must be lower than maintenance calories.");
+      alert("Daily intake must be lower than maintenance.");
       return;
     }
 
@@ -375,15 +625,37 @@
   }
 
   function resetToDayOne() {
-    const confirmed = confirm(
-      "Are you sure you want to reset your start date to today and restart your counter at Day 1?"
-    );
-
-    if (confirmed) {
+    if (confirm("Reset journey to Day 1 today and clear past logs?")) {
       document.getElementById('startDate').value = todayStr;
       displayedPounds = 0;
+      const initialLogs = [{
+        id: Date.now(),
+        datetime: getNowDateTimeLocal(),
+        weight: parseFloat(document.getElementById('currentWeight').value) || 185
+      }];
+      localStorage.setItem('weightLogs', JSON.stringify(initialLogs));
       saveSettings();
     }
+  }
+
+  function setTimeRange(range) {
+    currentTimeRange = range;
+    document.getElementById('rangeLogged').classList.toggle('active', range === 'LOGGED');
+    document.getElementById('rangeFull').classList.toggle('active', range === 'FULL');
+    updateDisplay();
+  }
+
+  function setLineVisibility(view) {
+    currentLineView = view;
+    ['both', 'actual', 'projected'].forEach(v => {
+      document.getElementById('btn' + v.charAt(0).toUpperCase() + v.slice(1)).classList.remove('active');
+    });
+    document.getElementById('btn' + view.charAt(0).toUpperCase() + view.slice(1)).classList.add('active');
+
+    if (!weightChart) return;
+    weightChart.setDatasetVisibility(0, view === 'both' || view === 'actual');
+    weightChart.setDatasetVisibility(1, view === 'both' || view === 'projected');
+    weightChart.update();
   }
 
   function updateDisplay() {
@@ -399,17 +671,14 @@
 
     const dailyDeficit = maint - intake;
     const totalPounds = cur - target;
-    const totalDeficitNeeded = totalPounds * 3500;
-    const totalDays = Math.ceil(totalDeficitNeeded / dailyDeficit);
+    const totalDays = Math.ceil((totalPounds * 3500) / dailyDeficit);
 
-    // Midnight of start date
     const start = new Date(startStr + "T00:00:00");
     const now = new Date();
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
     const diffDays = Math.floor((today - start) / (1000 * 60 * 60 * 24)) + 1;
     const currentDay = Math.max(1, diffDays);
-    const remainingDays = Math.max(0, totalDays - currentDay);
 
     const projected = new Date(start);
     projected.setDate(projected.getDate() + totalDays);
@@ -420,15 +689,11 @@
     const percent = Math.min(100, Math.round((currentDay / totalDays) * 100));
     document.getElementById('progressFill').style.width = percent + '%';
 
-    document.getElementById('summaryBox').innerHTML =
-      `Deficit: <b>${dailyDeficit} kcal/day</b><br><b>${remainingDays} days</b> left at ${intake} kcal to finish (${percent}% completed).`;
-
     document.getElementById('finishDate').innerText =
-      `🏁 Projected Finish: ${projected.toLocaleDateString(undefined, dateOptions)}`;
+      `🏁 Projected Goal Date: ${projected.toLocaleDateString(undefined, dateOptions)}`;
 
-    // SMOOTH ROLLING ODOMETER (Updates every 40 milliseconds)
+    // Realtime Rolling Odometer
     if (liveAnimationTimer) clearInterval(liveAnimationTimer);
-
     const lbsPerMs = dailyDeficit / (3500 * 86400 * 1000);
 
     function tickGradualCounter() {
@@ -436,34 +701,180 @@
       const elapsedMs = Math.max(0, currentTime - start);
       const trueTargetBurned = Math.min(totalPounds, elapsedMs * lbsPerMs);
 
-      // Initialize on first load slightly behind target so it rolls in smoothly
       if (displayedPounds === null) {
         displayedPounds = Math.max(0, trueTargetBurned - 0.000030);
       }
 
-      // If behind, smoothly roll towards the true number instead of jumping
       if (displayedPounds < trueTargetBurned) {
         const diff = trueTargetBurned - displayedPounds;
-        // Step size smoothly scales so it catches up gracefully
-        const step = Math.max(0.000001, diff * 0.08);
-        displayedPounds += step;
-
-        if (displayedPounds >= trueTargetBurned) {
-          displayedPounds = trueTargetBurned;
-        }
+        displayedPounds += Math.max(0.000001, diff * 0.08);
+        if (displayedPounds >= trueTargetBurned) displayedPounds = trueTargetBurned;
       } else {
         displayedPounds = trueTargetBurned;
       }
 
       const remainingBurn = Math.max(0, totalPounds - displayedPounds);
-
-      // Exactly 6 decimal places, rolling gradually
       document.getElementById('livePoundsVal').innerText = `${displayedPounds.toFixed(6)} lbs`;
       document.getElementById('livePoundsLeft').innerText = `~${remainingBurn.toFixed(4)} lbs left to goal`;
     }
 
     tickGradualCounter();
-    liveAnimationTimer = setInterval(tickGradualCounter, 40); // 40ms smooth loop
+    liveAnimationTimer = setInterval(tickGradualCounter, 40);
+
+    renderChart(start, projected, cur, target, dailyDeficit);
+  }
+
+  function renderChart(startDate, projectedEndDate, startingWeight, targetWeight, dailyDeficit) {
+    let logs = JSON.parse(localStorage.getItem('weightLogs')) || [];
+    logs.sort((a, b) => new Date(a.datetime) - new Date(b.datetime));
+
+    const actualPoints = logs.map(l => ({
+      x: new Date(l.datetime).getTime(),
+      y: l.weight
+    }));
+
+    let minX, maxX;
+    let projectedPoints = [];
+
+    if (currentTimeRange === 'FULL') {
+      minX = startDate.getTime();
+      maxX = projectedEndDate.getTime();
+
+      // Checkpoints dotted along the entire ruler-straight line
+      const steps = 14;
+      const totalSpan = maxX - minX;
+
+      for (let i = 0; i <= steps; i++) {
+        const t = minX + (totalSpan * (i / steps));
+        const daysFromStart = (t - minX) / (1000 * 60 * 60 * 24);
+        const expected = Math.max(targetWeight, startingWeight - ((daysFromStart * dailyDeficit) / 3500));
+        projectedPoints.push({
+          x: t,
+          y: parseFloat(expected.toFixed(1))
+        });
+      }
+    } else {
+      if (logs.length > 1) {
+        minX = new Date(logs[0].datetime).getTime();
+        maxX = new Date(logs[logs.length - 1].datetime).getTime();
+      } else if (logs.length === 1) {
+        minX = startDate.getTime();
+        maxX = Math.max(new Date(logs[0].datetime).getTime(), minX + (24 * 3600 * 1000));
+      } else {
+        minX = startDate.getTime();
+        maxX = minX + (7 * 24 * 3600 * 1000);
+      }
+
+      // Checkpoints along the First to Last range
+      const steps = 8;
+      const span = maxX - minX;
+
+      for (let i = 0; i <= steps; i++) {
+        const t = minX + (span * (i / steps));
+        const daysFromStart = Math.max(0, (t - startDate.getTime()) / (1000 * 60 * 60 * 24));
+        const expected = Math.max(targetWeight, startingWeight - ((daysFromStart * dailyDeficit) / 3500));
+        projectedPoints.push({
+          x: t,
+          y: parseFloat(expected.toFixed(1))
+        });
+      }
+    }
+
+    if (weightChart) weightChart.destroy();
+
+    const ctx = document.getElementById('weightChart').getContext('2d');
+    weightChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        datasets: [
+          {
+            label: 'Actual',
+            data: actualPoints,
+            borderColor: '#ffffff',
+            backgroundColor: '#ffffff',
+            pointBackgroundColor: '#ffffff',
+            pointBorderColor: '#191b1c',
+            pointBorderWidth: 2,
+            pointRadius: 5,
+            pointHoverRadius: 8,
+            pointHitRadius: 25,
+            spanGaps: true,
+            tension: 0.4, // Smooth curved interpolation between actual logs
+            cubicInterpolationMode: 'monotone',
+            borderWidth: 2.4
+          },
+          {
+            label: 'Projected',
+            data: projectedPoints,
+            borderColor: '#ff4e45',
+            backgroundColor: 'transparent',
+            pointBackgroundColor: '#ff4e45',
+            pointRadius: 3.5, // Dotted checkpoint markers along the line
+            pointHoverRadius: 6,
+            pointHitRadius: 20,
+            borderDash: [5, 5],
+            tension: 0, // Ruler-straight slope
+            borderWidth: 1.8
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: {
+          mode: 'nearest',
+          axis: 'x',
+          intersect: false
+        },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: '#212121',
+            titleColor: '#ffffff',
+            bodyColor: '#dddddd',
+            borderColor: '#7b7265',
+            borderWidth: 1,
+            padding: 10,
+            titleFont: { size: 13, weight: 'bold' },
+            bodyFont: { size: 12 },
+            callbacks: {
+              title: function(items) {
+                if (!items.length) return '';
+                const d = new Date(items[0].parsed.x);
+                return d.toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' });
+              },
+              label: function(ctx) {
+                if (ctx.parsed.y === null || isNaN(ctx.parsed.y)) return null;
+                return ` ${ctx.dataset.label}: ${ctx.parsed.y.toFixed(1)} lbs`;
+              }
+            }
+          }
+        },
+        scales: {
+          x: {
+            type: 'linear',
+            min: minX,
+            max: maxX,
+            grid: { color: '#25282a' },
+            ticks: {
+              color: '#aaaaaa',
+              font: { size: 11 },
+              maxTicksLimit: 5,
+              callback: function(val) {
+                const d = new Date(val);
+                return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+              }
+            }
+          },
+          y: {
+            grid: { color: '#25282a' },
+            ticks: { color: '#aaaaaa', font: { size: 11 } }
+          }
+        }
+      }
+    });
+
+    setLineVisibility(currentLineView);
   }
 </script>
 
